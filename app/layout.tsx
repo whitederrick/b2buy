@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "B2BUY · 소상공인 중국 직소싱 펀딩형 공동구매",
   description:
     "뷰티·생활용품 부자재(공용기·펌프 등) 1688 공장 직소싱 펀딩형 공동구매 플랫폼. 모이면 모일수록 단가가 내려갑니다.",
+};
+
+export const viewport: Viewport = {
   themeColor: "#FF5A1F"
 };
 
