@@ -15,7 +15,7 @@ export default function NewAdminDealPage() {
             공동구매 딜 등록
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-b2buy-muted">
-            1688 원천 상품, MoQ, 구간 단가, 에스크로 수수료를 입력해 새 모집 딜을 엽니다.
+            공급 상품, MoQ, 구간 단가와 운영 조건을 입력해 새 모집 딜을 엽니다.
           </p>
         </div>
         <Link

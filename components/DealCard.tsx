@@ -9,6 +9,7 @@ export interface DealCardProps {
     id: string;
     title: string;
     product_name: string;
+    category?: string;
     image_url: string | null;
     moq_target: number;
     current_qty: number;
@@ -51,26 +52,24 @@ export default function DealCard({ deal, pollingMs = 7000, currentUser = null }:
   useEffect(() => {
     if (!pollingMs) return;
     let aborted = false;
-
     const fetchProgress = async () => {
       try {
-        const r = await fetch(`/api/deals/progress?id=${deal.id}`, { cache: "no-store" });
-        const j = await r.json();
-        if (aborted || !j.ok) return;
+        const response = await fetch(`/api/deals/progress?id=${deal.id}`, { cache: "no-store" });
+        const json = await response.json();
+        if (aborted || !json.ok) return;
         setData({
-          current_qty: j.data.current_qty,
-          currentUnitPrice: j.data.currentUnitPrice,
-          achievementPct: j.data.achievementPct,
-          dDay: j.data.dDay,
-          nextTier: j.data.nextTier ?? null,
-          remainingToNext: j.data.remainingToNext,
-          status: j.data.status
+          current_qty: json.data.current_qty,
+          currentUnitPrice: json.data.currentUnitPrice,
+          achievementPct: json.data.achievementPct,
+          dDay: json.data.dDay,
+          nextTier: json.data.nextTier ?? null,
+          remainingToNext: json.data.remainingToNext,
+          status: json.data.status
         });
       } catch {
-        // 일시적인 네트워크 오류는 다음 폴링에서 복구됩니다.
+        // 다음 폴링에서 다시 시도합니다.
       }
     };
-
     const timer = setInterval(fetchProgress, pollingMs);
     return () => {
       aborted = true;
@@ -117,11 +116,11 @@ export default function DealCard({ deal, pollingMs = 7000, currentUser = null }:
         </span>
 
         <span className="absolute right-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-          1688 공장 직소싱
+          검증 공급사
         </span>
 
         <span className="absolute bottom-3 left-3 rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-b2buy-ink shadow">
-          카테고리 C · 뷰티 공용기
+          {categoryLabel(deal.category)}
         </span>
       </header>
 
@@ -199,7 +198,6 @@ export default function DealCard({ deal, pollingMs = 7000, currentUser = null }:
 
 function ProgressBar({ current, target, pct }: { current: number; target: number; pct: number }) {
   const safePct = Math.max(0, Math.min(100, pct));
-
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
@@ -217,7 +215,6 @@ function ProgressBar({ current, target, pct }: { current: number; target: number
           className="h-full rounded-full bg-gradient-to-r from-b2buy-primary to-orange-400 transition-[width] duration-700 ease-out"
           style={{ width: `${safePct}%` }}
         />
-        <div className="absolute top-0 h-full w-px bg-white/60" style={{ left: "50%" }} />
       </div>
       <div className="mt-1.5 flex justify-between text-[11px] text-b2buy-muted">
         <span>
@@ -241,7 +238,6 @@ function PriceTierTable({
   currentPrice: number;
 }) {
   const sorted = useMemo(() => [...tiers].sort((a, b) => a.min_qty - b.min_qty), [tiers]);
-
   return (
     <div className="overflow-hidden rounded-xl border border-b2buy-line">
       <table className="w-full text-xs">
@@ -253,18 +249,17 @@ function PriceTierTable({
           </tr>
         </thead>
         <tbody>
-          {sorted.map((tier, idx) => {
+          {sorted.map((tier, index) => {
             const isCurrent = currentPrice === tier.price;
             const isPassed = currentQty >= (tier.max_qty ?? Infinity);
             const range =
               tier.max_qty == null
                 ? `${tier.min_qty.toLocaleString("ko-KR")}개 이상`
                 : `${tier.min_qty.toLocaleString("ko-KR")} ~ ${(tier.max_qty - 1).toLocaleString("ko-KR")}개`;
-
             return (
               <tr
-                key={idx}
-                className={`border-t border-b2buy-line transition ${
+                key={index}
+                className={`border-t border-b2buy-line ${
                   isCurrent
                     ? "bg-orange-50 font-bold text-b2buy-primary"
                     : isPassed
@@ -275,15 +270,7 @@ function PriceTierTable({
                 <td className="px-2 py-1.5">{range}</td>
                 <td className="px-2 py-1.5 text-right">{tier.price.toLocaleString("ko-KR")}원</td>
                 <td className="px-2 py-1.5 text-right">
-                  {isCurrent ? (
-                    <span className="rounded bg-b2buy-primary px-1.5 py-0.5 text-[10px] text-white">
-                      현재
-                    </span>
-                  ) : isPassed ? (
-                    <span className="text-[10px] text-gray-400">달성</span>
-                  ) : (
-                    <span className="text-[10px] text-b2buy-muted">대기</span>
-                  )}
+                  {isCurrent ? "현재" : isPassed ? "달성" : "대기"}
                 </td>
               </tr>
             );
@@ -294,15 +281,18 @@ function PriceTierTable({
   );
 }
 
+function categoryLabel(category?: string): string {
+  if (category === "beauty-container" || category === "beauty") return "뷰티 · 패키징";
+  return category || "사업자 전용";
+}
+
 function ddayFrom(endDate: string): number {
   const diff = new Date(endDate).getTime() - Date.now();
-  if (diff <= 0) return 0;
-  return Math.ceil(diff / 86_400_000);
+  return diff <= 0 ? 0 : Math.ceil(diff / 86_400_000);
 }
 
 function nextTierOf(tiers: PriceTier[], qty: number): PriceTier | null {
-  const sorted = [...tiers].sort((a, b) => a.min_qty - b.min_qty);
-  return sorted.find((tier) => tier.min_qty > qty) ?? null;
+  return [...tiers].sort((a, b) => a.min_qty - b.min_qty).find((tier) => tier.min_qty > qty) ?? null;
 }
 
 function remainingToNext(tiers: PriceTier[], qty: number): number {

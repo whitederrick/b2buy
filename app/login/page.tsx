@@ -16,6 +16,8 @@ interface SignupFields {
   position: string;
   company_phone: string;
   company_address: string;
+  biz_type: string;
+  biz_item: string;
 }
 
 const EMPTY_SIGNUP: SignupFields = {
@@ -27,7 +29,9 @@ const EMPTY_SIGNUP: SignupFields = {
   department: "",
   position: "",
   company_phone: "",
-  company_address: ""
+  company_address: "",
+  biz_type: "",
+  biz_item: ""
 };
 
 export default function LoginPage() {
@@ -50,13 +54,11 @@ export default function LoginPage() {
         body: JSON.stringify({ email: userId, password })
       });
       const json = await res.json();
-      if (!res.ok || !json.ok) {
-        throw new Error(json.error || "로그인에 실패했습니다.");
-      }
-      router.push("/mypage");
+      if (!res.ok || !json.ok) throw new Error(json.error || "로그인에 실패했습니다.");
+      router.push("/deals");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "로그인 중 오류가 발생했습니다.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -82,13 +84,13 @@ export default function LoginPage() {
           department: signupFields.department || undefined,
           position: signupFields.position || undefined,
           company_phone: signupFields.company_phone || undefined,
-          company_address: signupFields.company_address || undefined
+          company_address: signupFields.company_address || undefined,
+          biz_type: signupFields.biz_type,
+          biz_item: signupFields.biz_item
         })
       });
       const json = await res.json();
-      if (!res.ok || !json.ok) {
-        throw new Error(json.error || "회원가입에 실패했습니다.");
-      }
+      if (!res.ok || !json.ok) throw new Error(json.error || "회원가입에 실패했습니다.");
 
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
@@ -99,10 +101,10 @@ export default function LoginPage() {
       if (!loginRes.ok || !loginJson.ok) {
         throw new Error("가입은 완료되었지만 자동 로그인에 실패했습니다. 다시 로그인해 주세요.");
       }
-      router.push("/mypage");
+      router.push("/deals");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "회원가입 중 오류가 발생했습니다.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "회원가입 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -120,8 +122,8 @@ export default function LoginPage() {
         </h1>
         <p className="mt-1 text-xs text-b2buy-muted">
           {mode === "login"
-            ? "B2BUY 소상공인 회원으로 로그인하세요."
-            : "사업자등록번호와 담당자 정보를 입력해 가입할 수 있습니다."}
+            ? "B2BUY 사업자 회원 계정으로 로그인하세요."
+            : "업태와 업종을 등록하면 관련 공동구매만 맞춤 제안합니다."}
         </p>
 
         {error && (
@@ -138,7 +140,7 @@ export default function LoginPage() {
             label="아이디 또는 이메일"
             value={userId}
             onChange={setUserId}
-            placeholder="b2buy_owner"
+            placeholder="owner@company.co.kr"
             autoComplete="username"
           />
           <Field
@@ -156,61 +158,75 @@ export default function LoginPage() {
                 <Field
                   label="담당자명"
                   value={signupFields.manager_name}
-                  onChange={(v) => updateSignupField("manager_name", v)}
-                  placeholder="홍길동"
+                  onChange={(value) => updateSignupField("manager_name", value)}
+                  required
                 />
                 <Field
                   label="사업자등록번호"
                   value={signupFields.company_reg_no}
-                  onChange={(v) => updateSignupField("company_reg_no", v)}
+                  onChange={(value) => updateSignupField("company_reg_no", value)}
                   placeholder="123-45-67890"
+                  required
                 />
               </div>
               <Field
-                label="법인명"
+                label="회사명"
                 value={signupFields.company_name}
-                onChange={(v) => updateSignupField("company_name", v)}
-                placeholder="주식회사 뷰티랩"
+                onChange={(value) => updateSignupField("company_name", value)}
+                required
               />
               <Field
                 label="대표자명"
                 value={signupFields.ceo_name}
-                onChange={(v) => updateSignupField("ceo_name", v)}
-                placeholder="홍길동"
+                onChange={(value) => updateSignupField("ceo_name", value)}
+                required
               />
               <Field
                 label="이메일"
                 type="email"
                 value={signupFields.email}
-                onChange={(v) => updateSignupField("email", v)}
-                placeholder="hello@beautylab.co.kr"
+                onChange={(value) => updateSignupField("email", value)}
+                placeholder="owner@company.co.kr"
                 autoComplete="email"
+                required
               />
+              <div className="grid grid-cols-2 gap-2">
+                <Field
+                  label="업태"
+                  value={signupFields.biz_type}
+                  onChange={(value) => updateSignupField("biz_type", value)}
+                  placeholder="예: 제조업, 도소매업"
+                  required
+                />
+                <Field
+                  label="업종"
+                  value={signupFields.biz_item}
+                  onChange={(value) => updateSignupField("biz_item", value)}
+                  placeholder="예: 화장품, 포장용기"
+                  required
+                />
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <Field
                   label="부서"
                   value={signupFields.department}
-                  onChange={(v) => updateSignupField("department", v)}
-                  placeholder="구매팀"
+                  onChange={(value) => updateSignupField("department", value)}
                 />
                 <Field
                   label="직책"
                   value={signupFields.position}
-                  onChange={(v) => updateSignupField("position", v)}
-                  placeholder="대표"
+                  onChange={(value) => updateSignupField("position", value)}
                 />
               </div>
               <Field
-                label="회사 대표전화"
+                label="회사 전화번호"
                 value={signupFields.company_phone}
-                onChange={(v) => updateSignupField("company_phone", v)}
-                placeholder="02-1234-5678"
+                onChange={(value) => updateSignupField("company_phone", value)}
               />
               <Field
                 label="사업장 주소"
                 value={signupFields.company_address}
-                onChange={(v) => updateSignupField("company_address", v)}
-                placeholder="서울특별시 강남구 테헤란로 123"
+                onChange={(value) => updateSignupField("company_address", value)}
               />
             </>
           )}
@@ -220,38 +236,21 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-xl bg-b2buy-primary py-3 text-sm font-extrabold text-white shadow hover:bg-b2buy-primaryDark disabled:opacity-60"
           >
-            {loading
-              ? "처리 중..."
-              : mode === "login"
-              ? "로그인"
-              : "회원가입"}
+            {loading ? "처리 중..." : mode === "login" ? "로그인" : "회원가입"}
           </button>
         </form>
 
         <div className="mt-4 text-center text-xs text-b2buy-muted">
-          {mode === "login" ? (
-            <>
-              아직 회원이 아니신가요?{" "}
-              <button
-                type="button"
-                className="font-bold text-b2buy-primary hover:underline"
-                onClick={() => { setMode("signup"); setError(null); }}
-              >
-                회원가입
-              </button>
-            </>
-          ) : (
-            <>
-              이미 회원이신가요?{" "}
-              <button
-                type="button"
-                className="font-bold text-b2buy-primary hover:underline"
-                onClick={() => { setMode("login"); setError(null); }}
-              >
-                로그인으로
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            className="font-bold text-b2buy-primary hover:underline"
+            onClick={() => {
+              setMode(mode === "login" ? "signup" : "login");
+              setError(null);
+            }}
+          >
+            {mode === "login" ? "사업자 회원가입" : "로그인으로 돌아가기"}
+          </button>
         </div>
       </div>
 
@@ -265,14 +264,21 @@ export default function LoginPage() {
 }
 
 function Field({
-  label, value, onChange, placeholder, type = "text", autoComplete
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  autoComplete,
+  required = false
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
   autoComplete?: string;
+  required?: boolean;
 }) {
   return (
     <label className="block">
@@ -280,6 +286,7 @@ function Field({
       <input
         type={type}
         value={value}
+        required={required}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}

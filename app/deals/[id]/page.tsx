@@ -64,6 +64,7 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
             id: deal.id,
             title: deal.title,
             product_name: deal.product_name,
+            category: deal.category,
             image_url: deal.image_url,
             moq_target: deal.moq_target,
             current_qty: deal.current_qty,
@@ -102,7 +103,7 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
               rel="noreferrer"
               className="mt-4 inline-block text-xs font-bold text-b2buy-primary hover:underline"
             >
-              1688 원천 페이지 보기
+              공급사 원문 보기
             </a>
           )}
         </section>

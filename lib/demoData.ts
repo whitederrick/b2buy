@@ -4,6 +4,7 @@ export interface DemoDeal {
   id: string;
   title: string;
   product_name: string;
+  category: string;
   image_url: string | null;
   moq_target: number;
   current_qty: number;
@@ -26,6 +27,7 @@ export const DEMO_DEALS: DemoDeal[] = [
     id: "11111111-1111-1111-1111-111111111111",
     title: "인디 브랜드 공용 50ml 유리 에센스 병",
     product_name: "3923.30 · 50ml 유리 에센스 병",
+    category: "beauty-container",
     image_url: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600",
     moq_target: 30_000,
     current_qty: 8_200,
@@ -48,6 +50,7 @@ export const DEMO_DEALS: DemoDeal[] = [
     id: "22222222-2222-2222-2222-222222222222",
     title: "화장품 펌프 캡 24/410 표준 사출",
     product_name: "3923.30 · 24/410 펌프 캡",
+    category: "beauty-container",
     image_url: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=600",
     moq_target: 50_000,
     current_qty: 21_500,
@@ -70,6 +73,7 @@ export const DEMO_DEALS: DemoDeal[] = [
     id: "33333333-3333-3333-3333-333333333333",
     title: "30ml 토너용 PET 병 라벨 포함",
     product_name: "3923.30 · 30ml PET 토너 병",
+    category: "beauty-container",
     image_url: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600",
     moq_target: 20_000,
     current_qty: 19_800,

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   // 1) 입력값 검증
   const required: (keyof SignupInput)[] = [
     "email", "password", "user_id", "manager_name", "phone_number",
-    "company_reg_no", "company_name", "ceo_name"
+    "company_reg_no", "company_name", "ceo_name", "biz_type", "biz_item"
   ];
   for (const k of required) {
     if (!body[k] || String(body[k]).trim() === "") {

@@ -158,7 +158,7 @@ export default function AdminDealForm({
           <Field label="HS 코드" value={form.hs_code} onChange={(v) => update("hs_code", v)} />
           <Field label="카테고리" value={form.category} onChange={(v) => update("category", v)} />
           <Field
-            label="1688 원천 URL"
+            label="공급사 원문 URL"
             value={form.product_url}
             onChange={(v) => update("product_url", v)}
           />
