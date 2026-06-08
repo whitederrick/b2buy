@@ -1,13 +1,19 @@
 import { notFound } from "next/navigation";
 import DealCard from "@/components/DealCard";
-import { getServerSupabase, calcTierPrice, calcAchievement, calcDDay, type DealRow } from "@/lib/supabase";
+import {
+  getServerSupabase,
+  calcTierPrice,
+  calcAchievement,
+  calcDDay,
+  type DealRow
+} from "@/lib/supabase";
 import { DEMO_DEALS } from "@/lib/demoData";
 
 export const dynamic = "force-dynamic";
 
 export default async function DealDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let deal: any = null;
+  let deal: DealRow | (typeof DEMO_DEALS)[number] | null = null;
 
   try {
     const supabase = await getServerSupabase();
@@ -17,22 +23,25 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
       .eq("id", id)
       .single<DealRow>();
     if (!error && data) deal = data;
-  } catch { /* 폴백 */ }
+  } catch {
+    // Supabase 설정이 없거나 일시 오류가 있으면 데모 데이터로 폴백합니다.
+  }
 
   if (!deal) {
     deal = DEMO_DEALS.find((d) => d.id === id) ?? null;
   }
   if (!deal) return notFound();
 
-  const tiers = deal.price_tiers as any;
+  const tiers = deal.price_tiers;
   const currentUnitPrice = calcTierPrice(tiers, deal.current_qty);
-  const achievementPct  = calcAchievement(deal.current_qty, deal.moq_target);
-  const dDay            = calcDDay(deal.end_date);
+  const achievementPct = calcAchievement(deal.current_qty, deal.moq_target);
+  const dDay = calcDDay(deal.end_date);
+  const hsCode = "hs_code" in deal ? deal.hs_code : null;
 
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs text-b2buy-muted">HS {deal.product_name}</p>
+        <p className="text-xs text-b2buy-muted">상품 {deal.product_name}</p>
         <h1 className="mt-1 text-2xl font-extrabold text-b2buy-ink sm:text-3xl">{deal.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full bg-b2buy-primary px-2.5 py-1 font-bold text-white">
@@ -72,7 +81,7 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
         <section className="rounded-2xl border border-b2buy-line bg-white p-5">
           <h2 className="text-base font-extrabold text-b2buy-ink">상세 정보</h2>
           <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <Spec k="HS 코드" v={deal.hs_code ?? "-"} />
+            <Spec k="HS 코드" v={hsCode ?? "-"} />
             <Spec k="MoQ 목표" v={`${deal.moq_target.toLocaleString("ko-KR")}개`} />
             <Spec k="현재 누적" v={`${deal.current_qty.toLocaleString("ko-KR")}개`} />
             <Spec k="국내 도매 기준가" v={`${deal.base_price.toLocaleString("ko-KR")}원`} />
@@ -87,7 +96,7 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
               rel="noreferrer"
               className="mt-4 inline-block text-xs font-bold text-b2buy-primary hover:underline"
             >
-              🏭 1688 원천 페이지 보기 →
+              1688 원천 페이지 보기
             </a>
           )}
         </section>
