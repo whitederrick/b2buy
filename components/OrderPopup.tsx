@@ -102,7 +102,6 @@ export default function OrderPopup(props: OrderPopupProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           deal_id: deal.id,
-          user_id: currentUser.id,
           requested_qty: qty,
           shipping_addr: shippingAddr,
           shipping_type: shippingType

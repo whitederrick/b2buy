@@ -1,6 +1,7 @@
 import DealCard from "@/components/DealCard";
 import { DEMO_DEALS } from "@/lib/demoData";
 import { getServerSupabase, calcTierPrice, type DealRow } from "@/lib/supabase";
+import { getCurrentUserOrNull } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -8,6 +9,7 @@ export const revalidate = 0;
 export default async function DealsPage() {
   let deals = DEMO_DEALS;
   let usingDemo = true;
+  const currentUser = await getCurrentUserOrNull();
 
   try {
     const supabase = await getServerSupabase();
@@ -91,10 +93,11 @@ export default async function DealsPage() {
               platform_fee: deal.platform_fee
             }}
             pollingMs={7000}
-            currentUser={{
-              id: "00000000-0000-0000-0000-000000000001",
-              name: "테스트 소상공인"
-            }}
+            currentUser={
+              currentUser
+                ? { id: currentUser.id, name: currentUser.manager_name }
+                : null
+            }
           />
         ))}
       </section>

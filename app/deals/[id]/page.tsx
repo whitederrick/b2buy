@@ -8,11 +8,13 @@ import {
   type DealRow
 } from "@/lib/supabase";
 import { DEMO_DEALS } from "@/lib/demoData";
+import { getCurrentUserOrNull } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function DealDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const currentUser = await getCurrentUserOrNull();
   let deal: DealRow | (typeof DEMO_DEALS)[number] | null = null;
 
   try {
@@ -75,7 +77,11 @@ export default async function DealDetail({ params }: { params: Promise<{ id: str
             escrow_fee_rate: deal.escrow_fee_rate ?? 1.5,
             platform_fee: deal.platform_fee ?? 5.0
           }}
-          currentUser={{ id: "00000000-0000-0000-0000-000000000001", name: "테스트 소상공인" }}
+          currentUser={
+            currentUser
+              ? { id: currentUser.id, name: currentUser.manager_name }
+              : null
+          }
         />
 
         <section className="rounded-2xl border border-b2buy-line bg-white p-5">
