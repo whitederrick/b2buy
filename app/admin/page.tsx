@@ -59,6 +59,12 @@ export default async function AdminPage() {
               Supabase 데이터 없음 · 데모 데이터 표시 중
             </span>
           )}
+          <Link
+            href="/admin/deals/new"
+            className="w-fit rounded-xl bg-b2buy-primary px-4 py-2 text-sm font-extrabold text-white hover:bg-b2buy-primaryDark"
+          >
+            새 딜 등록
+          </Link>
         </div>
       </section>
 
