@@ -44,7 +44,6 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      // 1) 서버에 로그인 요청 (쿠키 세션 생성)
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,7 +53,6 @@ export default function LoginPage() {
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "로그인에 실패했습니다.");
       }
-      // 2) 성공 → 마이페이지로 이동
       router.push("/mypage");
       router.refresh();
     } catch (err: any) {
@@ -69,7 +67,6 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      // 1) 회원가입 (서버에서 auth.users + public.users 트랜잭션 생성)
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,7 +89,7 @@ export default function LoginPage() {
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "회원가입에 실패했습니다.");
       }
-      // 2) 자동 로그인
+
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,7 +97,7 @@ export default function LoginPage() {
       });
       const loginJson = await loginRes.json();
       if (!loginRes.ok || !loginJson.ok) {
-        throw new Error("가입은 완료되었으나 자동 로그인에 실패했습니다. 다시 로그인해 주세요.");
+        throw new Error("가입은 완료되었지만 자동 로그인에 실패했습니다. 다시 로그인해 주세요.");
       }
       router.push("/mypage");
       router.refresh();
@@ -124,7 +121,7 @@ export default function LoginPage() {
         <p className="mt-1 text-xs text-b2buy-muted">
           {mode === "login"
             ? "B2BUY 소상공인 회원으로 로그인하세요."
-            : "법인 사업자등록번호 + 담당자 정보로 가입할 수 있습니다."}
+            : "사업자등록번호와 담당자 정보를 입력해 가입할 수 있습니다."}
         </p>
 
         {error && (
@@ -138,7 +135,7 @@ export default function LoginPage() {
           className="mt-5 space-y-3"
         >
           <Field
-            label="아이디 (User ID)"
+            label="아이디 또는 이메일"
             value={userId}
             onChange={setUserId}
             placeholder="b2buy_owner"
@@ -182,7 +179,7 @@ export default function LoginPage() {
                 placeholder="홍길동"
               />
               <Field
-                label="이메일 (로그인 ID)"
+                label="이메일"
                 type="email"
                 value={signupFields.email}
                 onChange={(v) => updateSignupField("email", v)}
@@ -194,13 +191,13 @@ export default function LoginPage() {
                   label="부서"
                   value={signupFields.department}
                   onChange={(v) => updateSignupField("department", v)}
-                  placeholder="경영지원"
+                  placeholder="구매팀"
                 />
                 <Field
                   label="직책"
                   value={signupFields.position}
                   onChange={(v) => updateSignupField("position", v)}
-                  placeholder="팀장"
+                  placeholder="대표"
                 />
               </div>
               <Field
@@ -224,7 +221,7 @@ export default function LoginPage() {
             className="w-full rounded-xl bg-b2buy-primary py-3 text-sm font-extrabold text-white shadow hover:bg-b2buy-primaryDark disabled:opacity-60"
           >
             {loading
-              ? "처리 중…"
+              ? "처리 중..."
               : mode === "login"
               ? "로그인"
               : "회원가입"}
@@ -260,7 +257,7 @@ export default function LoginPage() {
 
       <p className="mt-4 text-center text-[11px] text-b2buy-muted">
         <Link href="/" className="hover:underline">
-          ← 메인으로 돌아가기
+          메인으로 돌아가기
         </Link>
       </p>
     </div>
@@ -270,8 +267,12 @@ export default function LoginPage() {
 function Field({
   label, value, onChange, placeholder, type = "text", autoComplete
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; type?: string; autoComplete?: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  autoComplete?: string;
 }) {
   return (
     <label className="block">
