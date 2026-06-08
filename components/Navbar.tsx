@@ -7,14 +7,17 @@ export default function Navbar() {
   const [bellOn, setBellOn] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-b2buy-line bg-white/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3" aria-label="B2BUY home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/logo@4x.png"
             alt="B2BUY"
-            className="h-8 w-auto rounded-md"
+            className="h-11 w-auto rounded-lg shadow-sm"
           />
+          <span className="text-2xl font-black tracking-tight text-b2buy-ink">
+            B2<span className="text-b2buy-primary">BUY</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
