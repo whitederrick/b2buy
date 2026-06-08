@@ -5,7 +5,8 @@ import { DEMO_DEALS } from "@/lib/demoData";
 
 export const dynamic = "force-dynamic";
 
-export default async function DealDetail({ params }: { params: { id: string } }) {
+export default async function DealDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let deal: any = null;
 
   try {
@@ -13,13 +14,13 @@ export default async function DealDetail({ params }: { params: { id: string } })
     const { data, error } = await supabase
       .from("group_buy_deals")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .single<DealRow>();
     if (!error && data) deal = data;
   } catch { /* 폴백 */ }
 
   if (!deal) {
-    deal = DEMO_DEALS.find((d) => d.id === params.id) ?? null;
+    deal = DEMO_DEALS.find((d) => d.id === id) ?? null;
   }
   if (!deal) return notFound();
 
