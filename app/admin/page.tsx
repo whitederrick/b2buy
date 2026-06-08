@@ -101,6 +101,7 @@ export default async function AdminPage() {
                   <th className="px-3 py-2 text-right">현재 단가</th>
                   <th className="px-3 py-2 text-right">마감</th>
                   <th className="px-3 py-2 text-right">상태</th>
+                  <th className="px-3 py-2 text-right">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +133,14 @@ export default async function AdminPage() {
                       </td>
                       <td className="px-3 py-3 text-right">
                         <StatusBadge status={deal.status} />
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <Link
+                          href={`/admin/deals/${deal.id}/edit`}
+                          className="text-xs font-bold text-b2buy-primary hover:underline"
+                        >
+                          수정
+                        </Link>
                       </td>
                     </tr>
                   );

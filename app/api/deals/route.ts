@@ -6,12 +6,14 @@ import {
   getAdminSupabase,
   getServerSupabase,
   type DealRow,
+  type DealStatus,
   type PriceTier
 } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-type CreateDealBody = {
+type DealMutationBody = {
+  id?: string;
   title?: string;
   hs_code?: string | null;
   product_name?: string;
@@ -24,7 +26,7 @@ type CreateDealBody = {
   max_buy_qty?: number | null;
   start_date?: string;
   end_date?: string;
-  status?: string;
+  status?: DealStatus;
   price_tiers?: PriceTier[];
   base_price?: number;
   escrow_fee_rate?: number;
@@ -100,37 +102,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  let body: CreateDealBody;
+  let body: DealMutationBody;
   try {
     body = await req.json();
   } catch {
     return err("invalid JSON body");
   }
 
-  const validation = validateCreateDeal(body);
+  const validation = validateDealMutation(body);
   if (validation) return err(validation);
 
-  const payload = {
-    title: body.title!.trim(),
-    hs_code: normalizeOptional(body.hs_code),
-    product_name: body.product_name!.trim(),
-    product_url: normalizeOptional(body.product_url),
-    image_url: normalizeOptional(body.image_url),
-    category: normalizeOptional(body.category) ?? "beauty-container",
-    moq_target: Math.trunc(body.moq_target!),
-    current_qty: Math.trunc(body.current_qty ?? 0),
-    min_buy_qty: Math.trunc(body.min_buy_qty ?? 1),
-    max_buy_qty: body.max_buy_qty == null ? null : Math.trunc(body.max_buy_qty),
-    start_date: new Date(body.start_date!).toISOString(),
-    end_date: new Date(body.end_date!).toISOString(),
-    status: body.status ?? "모집중",
-    price_tiers: normalizePriceTiers(body.price_tiers!),
-    base_price: Math.trunc(body.base_price!),
-    escrow_fee_rate: body.escrow_fee_rate ?? 1.5,
-    platform_fee: body.platform_fee ?? 5.0,
-    shipping_cost: Math.trunc(body.shipping_cost ?? 0)
-  };
-
+  const payload = buildDealPayload(body);
   const supabase = getAdminSupabase();
   const { data, error } = await supabase
     .from("group_buy_deals")
@@ -138,14 +120,36 @@ export async function POST(req: NextRequest) {
     .select("*")
     .single<DealRow>();
 
-  if (error || !data) {
-    return err(error?.message ?? "deal create failed", 500);
-  }
-
+  if (error || !data) return err(error?.message ?? "deal create failed", 500);
   return ok(enrichDeal(data), 201);
 }
 
-function validateCreateDeal(body: CreateDealBody): string | null {
+export async function PATCH(req: NextRequest) {
+  let body: DealMutationBody;
+  try {
+    body = await req.json();
+  } catch {
+    return err("invalid JSON body");
+  }
+
+  if (!body.id) return err("id is required");
+  const validation = validateDealMutation(body);
+  if (validation) return err(validation);
+
+  const payload = buildDealPayload(body);
+  const supabase = getAdminSupabase();
+  const { data, error } = await supabase
+    .from("group_buy_deals")
+    .update(payload)
+    .eq("id", body.id)
+    .select("*")
+    .single<DealRow>();
+
+  if (error || !data) return err(error?.message ?? "deal update failed", 500);
+  return ok(enrichDeal(data));
+}
+
+function validateDealMutation(body: DealMutationBody): string | null {
   if (!body.title?.trim()) return "title is required";
   if (!body.product_name?.trim()) return "product_name is required";
   if (!Number.isFinite(body.moq_target) || body.moq_target! <= 0) return "moq_target must be positive";
@@ -181,6 +185,29 @@ function validateCreateDeal(body: CreateDealBody): string | null {
   }
 
   return null;
+}
+
+function buildDealPayload(body: DealMutationBody) {
+  return {
+    title: body.title!.trim(),
+    hs_code: normalizeOptional(body.hs_code),
+    product_name: body.product_name!.trim(),
+    product_url: normalizeOptional(body.product_url),
+    image_url: normalizeOptional(body.image_url),
+    category: normalizeOptional(body.category) ?? "beauty-container",
+    moq_target: Math.trunc(body.moq_target!),
+    current_qty: Math.trunc(body.current_qty ?? 0),
+    min_buy_qty: Math.trunc(body.min_buy_qty ?? 1),
+    max_buy_qty: body.max_buy_qty == null ? null : Math.trunc(body.max_buy_qty),
+    start_date: new Date(body.start_date!).toISOString(),
+    end_date: new Date(body.end_date!).toISOString(),
+    status: body.status ?? "모집중",
+    price_tiers: normalizePriceTiers(body.price_tiers!),
+    base_price: Math.trunc(body.base_price!),
+    escrow_fee_rate: body.escrow_fee_rate ?? 1.5,
+    platform_fee: body.platform_fee ?? 5.0,
+    shipping_cost: Math.trunc(body.shipping_cost ?? 0)
+  };
 }
 
 function normalizeOptional(value: string | null | undefined): string | null {
