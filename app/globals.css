@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --b2buy-primary: #ff5a1f;
+  --b2buy-accent: #00c896;
+}
+
+html,
+body {
+  background: #fafafa;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Pretendard", "Apple SD Gothic Neo", system-ui, -apple-system, sans-serif;
+}
+
+/* 스크롤바 얇게 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+/* 유틸: 라인 클램프 */
+.line-clamp-1 { display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+.line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* 숫자 입력 화살표 제거 (Stepper는 자체 구현) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }

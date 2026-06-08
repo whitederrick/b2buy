@@ -1,0 +1,44 @@
+# =============================================================================
+# Supabase CLI 설정 (v1.226.4 호환)
+# - npx supabase start  → Docker 컨테이너 기동 + 마이그레이션 자동 적용
+# =============================================================================
+
+project_id = "b2buy"
+
+[api]
+port     = 54321
+schemas  = ["public", "storage", "graphql_public"]
+max_rows = 1000
+
+[db]
+port         = 54322
+shadow_port  = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port    = 54323
+
+[inbucket]
+enabled = true
+port    = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled                  = true
+site_url                 = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry               = 3600
+enable_signup            = true
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup          = true
+double_confirm_changes = true
+enable_confirmations   = false
+
+[analytics]
+enabled = false
