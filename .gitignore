@@ -13,3 +13,5 @@ dist
 supabase/.temp/
 supabase/.branches/
 nul
+
+.vercel
