@@ -13,7 +13,6 @@
  */
 import { createBrowserClient, createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -87,6 +86,7 @@ export function getBrowserSupabase(): SupabaseClient {
 //   - 15+에서는 async 가능. 두 케이스 모두 안전하게 처리.
 // -----------------------------------------------------------------------------
 export async function getServerSupabase(): Promise<SupabaseClient> {
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -97,7 +97,7 @@ export async function getServerSupabase(): Promise<SupabaseClient> {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options as CookieOptions)
